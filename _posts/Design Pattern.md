@@ -255,7 +255,118 @@ layout: post
 
 ####享元
     运用共享技术有效地支持大量细粒度的对象
-    
-####代理
+    如果一个对象实例一经创建就不可变，那么反复创建相同的实例就没有必要，直接向调用方返回一个共享的实例就行，这样即节省内存，又可以减少创建对象的过程，提高运行速度
+    Byte来说，因为它一共只有256个状态，所以，通过Byte.valueOf()创建的Byte实例，全部都是缓存对象
 
-    
+    public class Student {
+        // 持有缓存:
+        private static final Map<String, Student> cache = new HashMap<>();
+
+        // 静态工厂方法:
+        public static Student create(int id, String name) {
+            String key = id + "\n" + name;
+            // 先查找缓存:
+            Student std = cache.get(key);
+            if (std == null) {
+                // 未找到,创建新对象:
+                System.out.println(String.format("create new Student(%s, %s)", id, name));
+                std = new Student(id, name);
+                // 放入缓存:
+                cache.put(key, std);
+            } else {
+                // 缓存中存在:
+                System.out.println(String.format("return cached Student(%s, %s)", std.id, std.name));
+            }
+            return std;
+        }
+
+        private final int id;
+        private final String name;
+
+        public Student(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+####代理
+    为其他对象提供一种代理以控制对这个对象的访问
+    Proxy，它和Adapter模式很类似
+
+    public AProxy implements A {
+        private A a;
+        public AProxy(A a) {
+            this.a = a;
+        }
+        public void a() {
+            if (getCurrentUser().isRoot()) {
+                this.a.a();
+            } else {
+                throw new SecurityException("Forbidden");
+            }
+        }//就实现了权限检查，只有符合要求的用户，才会真正调用目标方法，否则，会直接抛出异常
+    }
+
+###行为型模式
+    行为型模式主要涉及算法和对象间的职责分配。通过使用对象组合，行为型模式可以描述一组对象应该如何协作来完成一个整体任务
+####责任链
+    多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系。将这些对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理它为止
+         ┌─────────┐
+         │ Request │
+         └─────────┘
+              │
+    ┌ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ┐
+              ▼
+    │  ┌─────────────┐  │
+       │ ProcessorA  │
+    │  └─────────────┘  │
+              │
+    │         ▼         │
+       ┌─────────────┐
+    │  │ ProcessorB  │  │
+       └─────────────┘
+    │         │         │
+              ▼
+    │  ┌─────────────┐  │
+       │ ProcessorC  │
+    │  └─────────────┘  │
+              │
+    └ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ┘
+              │
+              ▼
+    财务审批就是一个责任链模式。假设某个员工需要报销一笔费用，审核者可以分为：
+
+        Manager：只能审核1000元以下的报销；
+        Director：只能审核10000元以下的报销；
+        CEO：可以审核任意额度
+
+    public class HandlerChain {
+        // 持有所有Handler:
+        private List<Handler> handlers = new ArrayList<>();
+
+        public void addHandler(Handler handler) {
+            this.handlers.add(handler);
+        }
+
+        public boolean process(Request request) {
+            // 依次调用每个Handler:
+            for (Handler handler : handlers) {
+                Boolean r = handler.process(request);
+                if (r != null) {
+                    // 如果返回TRUE或FALSE，处理结束:
+                    System.out.println(request + " " + (r ? "Approved by " : "Denied by ") + handler.getClass().getSimpleName());
+                    return r;
+                }
+            }
+            throw new RuntimeException("Could not handle request: " + request);
+        }
+    }
+####命令
+####解释器
+####迭代器
+####中介
+####备忘录
+####观察者
+####状态
+####策略
+####模板方法
+####访问者
