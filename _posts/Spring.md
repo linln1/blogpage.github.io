@@ -11,7 +11,7 @@ layout: post
 #Java笔记
 ##Spring
 ###IoC容器
-IoC全称Inversion of Control，直译为控制反转
+IoC全称Inversion of Control，直译为控制反转 
     核心问题是：
 
     谁负责创建组件？
@@ -60,10 +60,45 @@ IoC全称Inversion of Control，直译为控制反转
         <bean id="mailService" class="com.itranswarp.learnjava.service.MailService" />
     </beans>
     public class Main {
-    public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
-        UserService userService = context.getBean(UserService.class);
-        User user = userService.login("bob@example.com", "password");
-        System.out.println(user.getName());
+        public static void main(String[] args) {
+            ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
+            UserService userService = context.getBean(UserService.class);
+            User user = userService.login("bob@example.com", "password");
+            System.out.println(user.getName());
+        }
     }
-}
+####BeanFactory
+    Spring还提供另一种IoC容器叫BeanFactory，使用方式和ApplicationContext类似：
+
+    BeanFactory factory = new XmlBeanFactory(new ClassPathResource("application.xml"));
+    MailService mailService = factory.getBean(MailService.class);
+    BeanFactory和ApplicationContext的区别在于，BeanFactory的实现是按需创建，即第一次获取Bean时才创建这个Bean，而ApplicationContext会一次性创建所有的Bean。实际上，ApplicationContext接口是从BeanFactory接口继承而来的，并且，ApplicationContext提供了一些额外的功能，包括国际化支持、事件和通知机制等。通常情况下，我们总是使用ApplicationContext，很少会考虑使用BeanFactory
+
+####简化Application.xml配置______Annotation
+
+
+
+###AOP面向切面编程
+   Proxy模式
+   将某个功能，比如权限检查,安全检查,日志,事务等功能
+   Proxy
+   public class SecurityCheckBookService implements BookService{
+       public final BookService target;
+
+       public SecurityCheckBookService(BookService target){
+           this.target = target;
+       }
+
+       public void createBook(Book book){
+           securityCheck();
+           target.createBook(book);
+       }
+   }
+
+    AOP的织入，有3种方式：
+
+    1)编译期：在编译时，由编译器把切面调用编译进字节码，这种方式需要定义新的关键字并扩展编译器，AspectJ就扩展了Java编译器，使用关键字aspect来实现织入；
+    2)类加载器：在目标类被装载到JVM时，通过一个特殊的类加载器，对目标类的字节码重新“增强”；
+    3)运行期：目标对象和切面都是普通Java类，通过JVM的动态代理功能或者第三方库实现运行期动态织入
+
+
