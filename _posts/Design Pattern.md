@@ -362,7 +362,42 @@ layout: post
     }
 ####命令
 ####解释器
+    给定一个语言，定义它的文法的一种表示，并定义一个解释器，这个解释器使用该表示来解释语言中的句子
+    我们使用JDBC时，执行的SQL语句虽然是字符串，但最终需要数据库服务器的SQL解释器来把SQL“翻译”成数据库服务器能执行的代码，这个执行引擎也非常复杂，但对于使用者来说，仅仅需要写出SQL字符串即可
 ####迭代器
+    提供一种方法顺序访问一个聚合对象中的各个元素，而又不需要暴露该对象的内部表示
+    public class ReverseArrayCollection<T> implements Iterable<T> {
+        private T[] array;
+
+        public ReverseArrayCollection(T... objs) {
+            this.array = Arrays.copyOfRange(objs, 0, objs.length);
+        }
+
+        public Iterator<T> iterator() {
+            return new ReverseIterator();
+        }
+
+        class ReverseIterator implements Iterator<T> {
+            // 索引位置:
+            int index;
+
+            public ReverseIterator() {
+                // 创建Iterator时,索引在数组末尾:
+                this.index = ReverseArrayCollection.this.array.length;
+            }
+
+            public boolean hasNext() {
+                // 如果索引大于0,那么可以移动到下一个元素(倒序往前移动):
+                return index > 0;
+            }
+
+            public T next() {
+                // 将索引移动到下一个元素并返回(倒序往前移动):
+                index--;
+                return array[index];
+            }
+        }
+    }
 ####中介
 ####备忘录
 ####观察者
